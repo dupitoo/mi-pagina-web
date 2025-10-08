@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capitalisa In Solution S.A. — Venta de Autos</title>
+  <meta name="description" content="Capitalisa In Solution S.A. – Venta de autos nuevos y seminuevos. Cotiza hoy tu próximo carro." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Russo+One&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --blue-800:#0a3cff;
+      --blue-700:#0a4dff;
+      --blue-500:#1a73e8;
+      --accent:#00d1ff;
+      --dark:#0b1220;
+      --ink:#0f172a;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'Poppins',sans-serif;background:linear-gradient(180deg,#f7f9ff,#eef4ff 40%,#f7f8fb);color:var(--ink)}
+    a{text-decoration:none;color:inherit}
+
+    /* HEADER */
+    header{position:sticky;top:0;z-index:50;backdrop-filter:blur(10px) saturate(140%);background:rgba(255,255,255,.85);border-bottom:1px solid #e6e9f2}
+    .nav{display:flex;align-items:center;justify-content:space-between;padding:14px 0;width:min(1200px,92vw);margin:auto}
+    .logo{display:flex;align-items:center;gap:12px}
+    .logo h1{font-family:'Russo One',sans-serif;font-size:1.6rem;background:linear-gradient(90deg,var(--blue-800),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:.8px;text-transform:uppercase;text-shadow:0 2px 8px rgba(10,77,255,.25)}
+    .badge{font-size:.7rem;background:#eef2ff;color:var(--blue-700);border:1px solid #dbe2ff;padding:3px 8px;border-radius:999px;font-weight:700}
+    nav a{margin:0 10px;font-weight:600;position:relative}
+    nav a.active::after, nav a:hover::after{content:'';position:absolute;left:0;bottom:-6px;height:3px;width:100%;background:linear-gradient(90deg,var(--blue-700),var(--accent));border-radius:999px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,var(--blue-700),var(--accent));color:#fff;border:none;padding:12px 18px;border-radius:14px;font-weight:800;cursor:pointer;box-shadow:0 10px 24px rgba(26,115,232,.28);transition:transform .2s}
+    .btn:hover{transform:translateY(-2px)}
+
+    /* HERO */
+    .hero{position:relative;overflow:hidden}
+    .hero::before{content:'';position:absolute;inset:-20% -10% auto -10%;height:60vh;background:radial-gradient(800px 320px at 10% 10%,rgba(10,77,255,.15),transparent 60%),radial-gradient(900px 420px at 110% -10%,rgba(0,209,255,.18),transparent 60%)}
+    .hero-inner{width:min(1200px,92vw);margin:auto;display:grid;grid-template-columns:1.1fr .9fr;gap:28px;align-items:center;padding:56px 0 32px}
+    .headline{font-family:'Russo One',sans-serif;font-size:clamp(32px,3.6vw,56px);line-height:1.05;letter-spacing:.5px}
+    .sub{margin-top:12px;color:#475569}
+    .hero-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+    .hcard{background:#0b1220;color:#fff;border-radius:16px;padding:16px;text-align:center;box-shadow:0 18px 48px rgba(2,12,60,.35)}
+
+    /* SECTIONS */
+    .section{padding:56px 0}
+    h2.section-title{text-align:center;font-family:'Russo One',sans-serif;font-size:2.2rem;color:var(--blue-700);letter-spacing:1px;margin-bottom:36px;text-transform:uppercase;text-shadow:0 2px 10px rgba(10,77,255,.22)}
+
+    /* CARDS */
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;width:min(1200px,92vw);margin:auto}
+    .car-card{background:#fff;border-radius:18px;overflow:hidden;border:1px solid #edf0f6;box-shadow:0 12px 24px rgba(15,23,42,.06);cursor:pointer;transition:transform .25s ease,box-shadow .25s ease}
+    .car-card:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 20px 48px rgba(15,23,42,.12)}
+    .car-card img{width:100%;height:200px;object-fit:cover}
+    .info{padding:16px}
+    .info .title{font-weight:800;font-size:1.1rem;margin-bottom:6px}
+    .info .meta{display:flex;justify-content:space-between;color:#475569;font-size:.92rem;margin:8px 0}
+    .price{color:var(--blue-700);font-weight:900}
+    .chip{display:inline-block;padding:4px 10px;border-radius:999px;background:#edf2ff;color:var(--blue-700);font-size:.75rem;font-weight:800}
+
+    /* MODAL / GALERÍA */
+    .modal-overlay{position:fixed;inset:0;z-index:80;display:grid;place-items:center;background:rgba(3,6,16,.72);padding:20px;opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
+    .modal-overlay.open{opacity:1;visibility:visible}
+    .modal-card{width:min(1000px,96vw);background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 30px 80px rgba(2,12,60,.45);transform:translateY(10px) scale(.98);transition:transform .3s}
+    .modal-overlay.open .modal-card{transform:translateY(0) scale(1)}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #eef2f8}
+    .modal-body{display:grid;grid-template-columns:1.2fr .8fr;gap:20px;padding:18px}
+    .carousel{position:relative;border-radius:14px;overflow:hidden}
+    .slides{display:flex;transition:transform .8s cubic-bezier(.22,.65,.1,1);will-change:transform}
+    .slide-item{flex:0 0 100%;max-width:100%;display:flex;align-items:center;justify-content:center;background:#0b1220;position:relative}
+    .slide-item img{width:auto;max-width:100%;max-height:65vh;object-fit:contain;display:block;transform-style:preserve-3d;transition:transform .18s ease,box-shadow .18s ease}
+    .slide-item img:hover{transform:perspective(900px) rotateX(2deg) rotateY(-2deg) scale(1.01);box-shadow:0 12px 28px rgba(2,12,60,.2)}
+    .carousel-btn{position:absolute;top:calc(50% - 22px);width:44px;height:44px;border-radius:50%;}
+    .carousel-btn.prev{left:10px}
+    .carousel-btn.next{right:10px}
+    .indicator{position:absolute;right:12px;top:12px;background:rgba(10,77,255,.9);color:#fff;padding:6px 10px;border-radius:10px;font-size:.85rem;font-weight:800}
+    .caption{position:absolute;left:12px;bottom:12px;background:rgba(3,6,16,.65);color:#fff;padding:6px 10px;border-radius:10px;font-size:.9rem;font-weight:800}
+    .dots{display:flex;gap:8px;justify-content:center;margin-top:10px}
+    .dot{width:10px;height:10px;border-radius:50%;border:none;background:#c7d2fe;cursor:pointer}
+    .dot.active{background:var(--blue-500)}
+
+    /* SECCIONES EXTRA */
+    .finance{width:min(1200px,92vw);margin:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    .panel{background:#fff;border:1px solid #e8ecf6;border-radius:18px;padding:18px;box-shadow:0 8px 20px rgba(15,23,42,.06)}
+    .panel input,.panel select{width:100%;padding:12px;border:1px solid #dfe5f0;border-radius:12px;font-family:inherit;margin-top:8px}
+    .trust{width:min(1200px,92vw);margin:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .testimonial{background:#fff;border:1px solid #e8ecf6;border-radius:18px;padding:18px;box-shadow:0 8px 20px rgba(15,23,42,.06)}
+
+    footer{background:linear-gradient(180deg,#081127,#030712);color:#cbd5e1;text-align:center;padding:36px 0;margin-top:40px}
+
+    @media(max-width:960px){.hero-inner{grid-template-columns:1fr}.modal-body{grid-template-columns:1fr}.trust{grid-template-columns:1fr}.finance{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <a class="logo" href="#">
+        <h1>Capitalisa <span style="color:var(--accent)">In Solution S.A.</span></h1>
+        <span class="badge">Venta de autos</span>
+      </a>
+      <nav id="topnav">
+        <a href="#inicio" class="active">Inicio</a>
+        <a href="#catalogo">Autos</a>
+        <a href="#financiamiento">Financiamiento</a>
+        <a href="#opiniones">Opiniones</a>
+        <a href="#contacto">Contacto</a>
+      </nav>
+      <a class="btn" href="#catalogo">Cotiza tu auto</a>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section id="inicio" class="hero">
+    <div class="hero-inner">
+      <div>
+        <h2 class="headline">Tu auto, tu historia<br> empieza hoy.</h2>
+        <p class="sub">Autos nuevos y seminuevos con planes a tu medida, inspección garantizada y entrega rápida. Diseñado para un público joven y exigente.</p>
+        <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap">
+          <a href="#catalogo" class="btn">Ver catálogo</a>
+          <a href="#financiamiento" class="btn" style="background:linear-gradient(135deg,var(--accent),var(--blue-500))">Simular cuota</a>
+        </div>
+        <div class="hero-cards">
+          <div class="hcard"><div style="font-size:1.4rem;font-weight:900">+1,000</div><div style="opacity:.9">Clientes felices</div></div>
+          <div class="hcard"><div style="font-size:1.4rem;font-weight:900">48h</div><div style="opacity:.9">Entrega promedio</div></div>
+          <div class="hcard"><div style="font-size:1.4rem;font-weight:900">12m</div><div style="opacity:.9">Garantía básica</div></div>
+        </div>
+      </div>
+      <div>
+        <img alt="Auto hero" src="https://images.unsplash.com/photo-1553440569-bcc63803a83d?q=80&w=1600&auto=format&fit=crop" style="width:100%;border-radius:18px;box-shadow:0 20px 60px rgba(2,12,60,.25)"/>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATÁLOGO -->
+  <section id="catalogo" class="section">
+    <h2 class="section-title">Catálogo destacado</h2>
+    <div class="grid">
+      <!-- Spark GT -->
+      <article class="car-card" data-car="sparkGT" tabindex="0" role="button" aria-label="Ver detalles Chevrolet Spark GT 2016">
+        <img src="https://i.imgur.com/aaI6FGH.jpeg" alt="Chevrolet Spark GT 2016">
+        <div class="info">
+          <div class="title">Chevrolet Spark GT 2016</div>
+          <div class="meta"><span>Manual</span><span class="price">A consultar</span></div>
+          <span class="chip">Seminuevo</span>
+        </div>
+      </article>
+      <!-- Kia Picanto 2020 -->
+      <article class="car-card" data-car="picanto" tabindex="0" role="button" aria-label="Ver detalles Kia Picanto 2020">
+        <img src="https://images.unsplash.com/photo-1616780919360-9b2f2d0df2fd?q=80&w=1600&auto=format&fit=crop" alt="Kia Picanto 2020">
+        <div class="info">
+          <div class="title">Kia Picanto 2020</div>
+          <div class="meta"><span>Automático</span><span class="price">$10,900</span></div>
+          <span class="chip">Seminuevo</span>
+        </div>
+      </article>
+      <!-- Toyota Corolla 2019 -->
+      <article class="car-card" data-car="corolla" tabindex="0" role="button" aria-label="Ver detalles Toyota Corolla 2019">
+        <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=1600&auto=format&fit=crop" alt="Toyota Corolla 2019">
+        <div class="info">
+          <div class="title">Toyota Corolla 2019</div>
+          <div class="meta"><span>Automático</span><span class="price">$17,900</span></div>
+          <span class="chip">Seminuevo</span>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- MODAL / GALERÍA -->
+  <div id="carModal" class="modal-overlay" aria-hidden="true" role="dialog">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div style="display:flex;align-items:center;gap:10px">
+          <strong id="m-title" style="font-size:1.1rem">Título</strong>
+          <span class="badge" id="m-cond">Condición</span>
+        </div>
+        <button id="m-close" class="btn" aria-label="Cerrar">Cerrar</button>
+      </div>
+      <div class="modal-body">
+        <div>
+          <div class="carousel" id="m-carousel">
+            <div class="slides" id="m-slides"></div>
+            <div id="m-indicator" class="indicator"></div>
+            <button class="btn carousel-btn prev" id="m-prev" aria-label="Anterior">◀</button>
+            <button class="btn carousel-btn next" id="m-next" aria-label="Siguiente">▶</button>
+          </div>
+          <div id="m-dots" class="dots"></div>
+        </div>
+        <div>
+          <div style="font-size:1.6rem;font-weight:900;color:var(--blue-700)" id="m-price"></div>
+          <p id="m-desc" style="color:#475569"></p>
+          <div class="specs-grid" id="m-specs"></div>
+          <div class="modal-actions" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+            <a href="#contacto" class="btn">Cotizar</a>
+            <a href="#financiamiento" class="btn" style="background:linear-gradient(135deg,var(--accent),var(--blue-500))">Simular financiamiento</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FINANCIAMIENTO -->
+  <section id="financiamiento" class="section">
+    <h2 class="section-title">Simula tu financiamiento</h2>
+    <div class="finance">
+      <div class="panel">
+        <label>Monto aproximado</label>
+        <input type="number" id="monto" placeholder="20000" value="20000"/>
+        <label style="margin-top:12px">Plazo (meses)</label>
+        <select id="plazo">
+          <option>24</option>
+          <option selected>36</option>
+          <option>48</option>
+          <option>60</option>
+        </select>
+        <label style="margin-top:12px">Tasa anual (%)</label>
+        <input type="number" id="tasa" placeholder="9" value="9"/>
+        <button class="btn" style="margin-top:16px" onclick="calc()">Calcular cuota</button>
+      </div>
+      <div class="panel" id="resultado">
+        <h3>Resultado</h3>
+        <p>Ingresa los datos y presiona <b>Calcular cuota</b>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIOS -->
+  <section id="opiniones" class="section" style="background:#f8faff">
+    <h2 class="section-title">Clientes felices</h2>
+    <div class="trust">
+      <div class="testimonial">“Me entregaron el carro en 48 horas y me ayudaron con todo el papeleo.” — <b>Carlos M.</b></div>
+      <div class="testimonial">“Compré mi primer auto con un plan perfecto para mí.” — <b>Daniela R.</b></div>
+      <div class="testimonial">“Autos en muy buen estado y opciones para financiar sin enredo.” — <b>Andrés V.</b></div>
+    </div>
+  </section>
+
+  <!-- CONTACTO -->
+  <section id="contacto" class="section">
+    <h2 class="section-title">Contáctanos</h2>
+    <div class="finance">
+      <form class="panel" onsubmit="event.preventDefault(); alert('¡Gracias! Te contactaremos pronto.'); this.reset();">
+        <label>Nombre</label>
+        <input required placeholder="Tu nombre"/>
+        <label style="margin-top:12px">Correo</label>
+        <input type="email" required placeholder="tunombre@email.com"/>
+        <label style="margin-top:12px">Mensaje</label>
+        <textarea required placeholder="Quiero cotizar un Spark GT..." style="width:100%; min-height:110px; padding:12px; border-radius:12px; border:1px solid #dfe5f0; font-family:inherit"></textarea>
+        <button class="btn" style="margin-top:16px">Enviar</button>
+      </form>
+      <div class="panel">
+        <h3>Showroom</h3>
+        <p>Av. Principal, Ciudad — Lunes a Sábado 9:00–18:00</p>
+        <p><b>WhatsApp:</b> +507 6000-0000</p>
+        <p><b>Correo:</b> contacto@capitalisa.com</p>
+        <div style="margin-top:12px; font-size:.92rem; color:#475569">Síguenos en redes para ver ofertas y nuevos ingresos.</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>© <span id="y"></span> Capitalisa In Solution S.A. — Todos los derechos reservados.</p>
+  </footer>
+
+  <script>
+    // Nav activo al hacer scroll
+    const sections = ['inicio','catalogo','financiamiento','opiniones','contacto'];
+    const links = sections.map(id=>({id, el: document.querySelector(`nav a[href="#${id}"]`), sec: document.getElementById(id)}));
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        const link = links.find(l=>l.sec===e.target)?.el; if(!link) return;
+        if(e.isIntersecting){ document.querySelectorAll('#topnav a').forEach(a=>a.classList.remove('active')); link.classList.add('active'); }
+      });
+    },{rootMargin:'-40% 0px -50% 0px',threshold:0.1});
+    links.forEach(l=>l.sec && io.observe(l.sec));
+
+    // Financiamiento
+    function calc(){
+      const P = parseFloat(document.getElementById('monto').value||0);
+      const n = parseInt(document.getElementById('plazo').value||0,10);
+      const tasa = parseFloat(document.getElementById('tasa').value||0)/100/12;
+      if(!P||!n||!tasa){ document.getElementById('resultado').innerHTML='<h3>Resultado</h3><p>Completa los campos para calcular.</p>'; return; }
+      const cuota=(P*tasa)/(1-Math.pow(1+tasa,-n));
+      document.getElementById('resultado').innerHTML=`<h3>Resultado</h3><p><b>Cuota estimada mensual:</b> $${cuota.toFixed(2)}</p><p style="color:#475569">* Referencial. No incluye gastos ni seguro.</p>`;
+    }
+
+    // Datos de autos
+    const CAR_DATA = {
+      sparkGT: {
+        title:'Chevrolet Spark GT 2016', condition:'Seminuevo', price:'A consultar',
+        description:'Compacto confiable y económico. Motor S-TEC II 16V, A/C, dirección asistida, 5 puertas, Bluetooth/USB.',
+        slides:[
+          {src:'https://i.imgur.com/aaI6FGH.jpeg',label:'Perfil 3/4'},
+          {src:'https://i.imgur.com/6pk2Hgb.jpeg',label:'Frente'},
+          {src:'https://i.imgur.com/r2dTEmK.jpeg',label:'Interior'},
+          {src:'https://i.imgur.com/Zo5SIFh.jpeg',label:'Motor'},
+          {src:'https://i.imgur.com/ksvwbhY.jpeg',label:'Maletero'},
+        ],
+        specs:[['Año','2016'],['Transmisión','Manual'],['Combustible','Gasolina'],['Color','Blanco'],['Puertas','5']]
+      },
+      picanto: {
+        title:'Kia Picanto 2020', condition:'Seminuevo', price:'$10,900',
+        description:'Ciudadano ágil y económico. Pantalla táctil, cámara de retroceso y 6 airbags.',
+        slides:[
+          {src:'https://images.unsplash.com/photo-1616780919360-9b2f2d0df2fd?q=80&w=1600&auto=format&fit=crop',label:'Exterior'},
+          {src:'https://images.unsplash.com/photo-1593941707874-ef25b8b9290b?q=80&w=1600&auto=format&fit=crop',label:'Interior'},
+          {src:'https://images.unsplash.com/photo-1549921296-3ecf9e0d68ba?q=80&w=1600&auto=format&fit=crop',label:'Detalle'},
+        ],
+        specs:[['Año','2020'],['Transmisión','Automático'],['Combustible','Gasolina'],['Color','Gris'],['Puertas','5']]
+      },
+      corolla: {
+        title:'Toyota Corolla 2019', condition:'Seminuevo', price:'$17,900',
+        description:'Sedán confiable con excelente consumo. Asistencias de conducción y espacio superior.',
+        slides:[
+          {src:'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=1600&auto=format&fit=crop',label:'Exterior'},
+          {src:'https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?q=80&w=1600&auto=format&fit=crop',label:'Interior'},
+          {src:'https://images.unsplash.com/photo-1525609004556-c46c7d6cf023?q=80&w=1600&auto=format&fit=crop',label:'Detalle'},
+        ],
+        specs:[['Año','2019'],['Transmisión','Automático'],['Combustible','Gasolina'],['Color','Blanco'],['Puertas','4']]
+      }
+    };
+
+    // Modal/Galería lógica
+    const modal = document.getElementById('carModal');
+    const mTitle = document.getElementById('m-title');
+    const mCond = document.getElementById('m-cond');
+    const mPrice = document.getElementById('m-price');
+    const mDesc = document.getElementById('m-desc');
+    const mSpecs = document.getElementById('m-specs');
+    const slidesEl = document.getElementById('m-slides');
+    const dotsEl = document.getElementById('m-dots');
+    const indicatorEl = document.getElementById('m-indicator');
+    let idx=0, currentSlides=[];
+
+    function renderModal(key){
+      const car = CAR_DATA[key]; if(!car) return;
+      mTitle.textContent = car.title; mCond.textContent = car.condition; mPrice.textContent = car.price; mDesc.textContent = car.description;
+      slidesEl.innerHTML=''; dotsEl.innerHTML=''; mSpecs.innerHTML='';
+      currentSlides = car.slides;
+      currentSlides.forEach((s,i)=>{
+        const wrap=document.createElement('div'); wrap.className='slide-item';
+        const img=new Image(); img.src=s.src; img.alt=`${car.title} — ${s.label}`; img.draggable=false; img.loading='lazy';
+        const cap=document.createElement('div'); cap.className='caption'; cap.textContent=s.label;
+        wrap.append(img,cap); slidesEl.appendChild(wrap);
+        const dot=document.createElement('button'); dot.className='dot'; dot.title=s.label; dot.onclick=()=>go(i); dotsEl.appendChild(dot);
+      });
+      car.specs.forEach(([k,v])=>{ const d=document.createElement('div'); d.className='spec-item'; d.textContent=`${k}: ${v}`; mSpecs.appendChild(d); });
+      slidesEl.style.width = `${currentSlides.length*100}%`;
+      slidesEl.querySelectorAll('.slide-item').forEach(el=> el.style.width = `${100/currentSlides.length}%`);
+      idx=0; update();
+      modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
+    }
+    function update(){
+      slidesEl.style.transform = `translateX(${-idx*100}%)`;
+      document.querySelectorAll('.dot').forEach((d,i)=> d.classList.toggle('active', i===idx));
+      if(indicatorEl && currentSlides[idx]) indicatorEl.textContent = `${idx+1}/${currentSlides.length} • ${currentSlides[idx].label}`;
+    }
+    function go(i){ idx=(i+currentSlides.length)%currentSlides.length; update(); }
+    document.getElementById('m-prev').onclick=()=>go(idx-1);
+    document.getElementById('m-next').onclick=()=>go(idx+1);
+
+    // Swipe táctil
+    let startX=0, delta=0;
+    slidesEl.addEventListener('touchstart', e=>{ startX=e.touches[0].clientX; delta=0; }, {passive:true});
+    slidesEl.addEventListener('touchmove', e=>{ delta=e.touches[0].clientX-startX; const rect=slidesEl.getBoundingClientRect(); const pct=(delta/rect.width)*100; slidesEl.style.transform=`translateX(${(-idx*100)+pct}%)`; }, {passive:true});
+    slidesEl.addEventListener('touchend', ()=>{ if(delta>90) go(idx-1); else if(delta<-90) go(idx+1); else update(); });
+
+    function closeModal(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
+    document.getElementById('m-close').onclick=closeModal;
+    modal.addEventListener('click', e=>{ if(e.target===modal) closeModal(); });
+    document.addEventListener('keydown', e=>{ if(modal.classList.contains('open')){ if(e.key==='Escape') closeModal(); if(e.key==='ArrowLeft') go(idx-1); if(e.key==='ArrowRight') go(idx+1); } });
+
+    // Abrir desde cards
+    document.querySelectorAll('[data-car]').forEach(card=>{
+      card.addEventListener('click', ()=> renderModal(card.dataset.car));
+      card.addEventListener('keydown', e=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); renderModal(card.dataset.car); } });
+    });
+
+    // Año footer
+    document.getElementById('y').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
