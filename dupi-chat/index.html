@@ -1,0 +1,360 @@
+<!-- Dupi Chat PUBLICO: servir como index.html por HTTPS. No requiere backend propio; usa relays Nostr públicos. -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#075e54" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Dupi Chat" />
+<meta name="format-detection" content="telephone=no" />
+<meta name="referrer" content="no-referrer" />
+<title>Dupi Chat — Mensajería</title>
+<meta name="description" content="Dupi Chat: mensajería privada desde el navegador." />
+<style>
+:root{
+  --green:#00a884;--deep:#075e54;--dark:#111b21;--panel:#202c33;--line:#2a3942;
+  --soft:#8696a0;--paper:#efeae2;--mine:#d9fdd3;--theirs:#fff;--ink:#111b21;
+  --danger:#e74c3c;--shadow:0 12px 35px rgba(0,0,0,.18);
+}
+*{box-sizing:border-box} html,body{height:100%;min-height:100%;margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:#0b141a}
+button,input,textarea{font:inherit} button{cursor:pointer}
+[hidden]{display:none!important}
+#app{height:100vh;height:100dvh;min-height:-webkit-fill-available;display:flex;align-items:center;justify-content:center;padding:0}
+.shell{width:100%;height:100vh;height:100dvh;min-height:-webkit-fill-available;max-width:1500px;background:#fff;display:grid;grid-template-columns:390px 1fr;overflow:hidden;box-shadow:var(--shadow)}
+.sidebar{background:#fff;border-right:1px solid #dfe3e5;display:flex;flex-direction:column;min-width:0;z-index:3}
+.topbar{height:calc(64px + env(safe-area-inset-top));background:#f0f2f5;display:flex;align-items:center;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;gap:11px;border-bottom:1px solid #e2e6e8}
+.avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;font-weight:800;color:#fff;background:linear-gradient(145deg,#00a884,#075e54);text-transform:uppercase;user-select:none}
+.avatar.big{width:72px;height:72px;font-size:24px}
+.me-info{min-width:0;flex:1}.me-info b,.chat-title b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sub{font-size:12px;color:#667781}
+.icon{border:0;background:transparent;color:#54656f;border-radius:50%;width:40px;height:40px;font-size:20px}.icon:hover{background:#e5e8ea}
+.search-wrap{padding:8px 12px;background:#fff}.search{background:#f0f2f5;border-radius:9px;display:flex;align-items:center;padding:0 12px;gap:8px}.search input{border:0;outline:0;background:transparent;width:100%;padding:10px 0;color:#111b21}
+.tabs{display:flex;padding:4px 12px 9px;gap:8px}.chip{border:1px solid #d7dbdd;background:#fff;color:#54656f;border-radius:999px;padding:7px 12px;font-size:13px}.chip.active{background:#e7fce8;border-color:#ccefcf;color:#087f5b}
+.list{overflow:auto;flex:1}.contact{display:flex;gap:12px;padding:11px 13px;align-items:center;border-bottom:1px solid #f0f2f5;cursor:pointer;transition:.15s}.contact:hover,.contact.active{background:#f0f2f5}.contact .avatar{width:49px;height:49px}.contact-main{min-width:0;flex:1}.row1,.row2{display:flex;justify-content:space-between;gap:8px;align-items:center}.row1 b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.row1 time,.row2 span{font-size:12px;color:#667781}.preview{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:230px}.online-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#b5bec4;margin-right:5px}.online-dot.on{background:#25d366;box-shadow:0 0 0 3px rgba(37,211,102,.12)}
+.empty-list{text-align:center;color:#667781;padding:40px 25px;font-size:14px}.empty-list strong{display:block;color:#3b4a54;margin-bottom:8px}
+.chat{min-width:0;display:flex;flex-direction:column;background:var(--paper);position:relative}.chat::before{content:"";position:absolute;inset:64px 0 62px;opacity:.055;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23000' stroke-width='1'%3E%3Cpath d='M15 20c8-8 18 6 10 13s-18-6-10-13zm64 55c8-8 18 6 10 13s-18-6-10-13zM53 18l8 8-8 8-8-8zm-5 66l8 8-8 8-8-8zM91 17c9 8-4 19-12 11s4-19 12-11zM22 75c9 8-4 19-12 11s4-19 12-11z'/%3E%3C/g%3E%3C/svg%3E")}
+.chat-head{height:64px;background:#f0f2f5;display:flex;align-items:center;padding:8px 16px;gap:12px;border-bottom:1px solid #dce1e3;z-index:1}.back{display:none}.chat-title{min-width:0;flex:1}.chat-title .status{font-size:12px;color:#667781}
+.messages{z-index:1;flex:1;overflow:auto;padding:22px clamp(14px,5vw,76px);display:flex;flex-direction:column;gap:4px;scroll-behavior:smooth}.date-pill{align-self:center;background:#fff;color:#54656f;border-radius:8px;padding:7px 12px;margin:8px 0;font-size:12px;box-shadow:0 1px 1px rgba(0,0,0,.12)}
+.msg{max-width:min(75%,620px);padding:7px 9px 6px;border-radius:8px;box-shadow:0 1px 1px rgba(0,0,0,.12);position:relative;color:var(--ink);white-space:pre-wrap;overflow-wrap:anywhere}.msg.mine{align-self:flex-end;background:var(--mine);border-top-right-radius:2px}.msg.theirs{align-self:flex-start;background:var(--theirs);border-top-left-radius:2px}.msg .meta{font-size:10.5px;color:#667781;float:right;margin:7px 0 -2px 10px;white-space:nowrap}.ticks{color:#53bdeb;font-weight:700}.composer{height:auto;min-height:calc(62px + env(safe-area-inset-bottom));background:#f0f2f5;display:flex;gap:8px;align-items:flex-end;padding:9px 14px calc(9px + env(safe-area-inset-bottom));z-index:1}.composer textarea{resize:none;max-height:120px;min-height:42px;flex:1;border:0;outline:0;background:#fff;border-radius:9px;padding:11px 14px;line-height:20px}.send{border:0;background:var(--green);color:#fff;width:44px;height:44px;border-radius:50%;font-size:19px;flex:0 0 auto;box-shadow:0 2px 7px rgba(0,0,0,.18)}.send:disabled{opacity:.5;cursor:not-allowed}
+.welcome{position:absolute;inset:0;background:#f0f2f5;display:grid;place-items:center;z-index:2;text-align:center;padding:28px}.welcome .inner{max-width:560px}.welcome .phone{font-size:74px;margin-bottom:15px}.welcome h1{font-size:31px;font-weight:400;color:#41525d;margin:0 0 12px}.welcome p{color:#667781;line-height:1.6}.lockline{margin-top:32px;font-size:12px;color:#8696a0}
+.modal-bg{position:fixed;inset:0;background:rgba(11,20,26,.72);display:grid;place-items:center;padding:18px;z-index:30}.modal{background:#fff;width:min(460px,100%);border-radius:18px;padding:26px;box-shadow:0 25px 80px rgba(0,0,0,.35)}.modal h2{margin:0 0 7px;font-size:25px}.modal p{margin:0 0 20px;color:#667781;line-height:1.45}.field{margin:14px 0}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:7px;color:#3b4a54}.field input{width:100%;padding:13px 14px;border:1px solid #ccd3d6;border-radius:10px;outline:none}.field input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,168,132,.12)}.primary{width:100%;border:0;background:var(--green);color:#fff;padding:13px 16px;border-radius:10px;font-weight:800;margin-top:8px}.primary:disabled{opacity:.55}.tiny{font-size:11px;color:#8696a0;margin-top:14px!important}.err{color:#c0392b;font-size:13px;min-height:18px;margin-top:7px}
+.toastbox{position:fixed;right:18px;bottom:18px;z-index:60;display:flex;flex-direction:column;gap:8px}.toast{background:#111b21;color:#fff;padding:11px 14px;border-radius:9px;box-shadow:0 8px 25px rgba(0,0,0,.28);font-size:13px;max-width:320px}.toast.bad{background:#8b1e18}
+.menu{position:absolute;top:59px;right:8px;background:#fff;border-radius:8px;box-shadow:0 8px 25px rgba(0,0,0,.2);min-width:210px;padding:6px 0;z-index:15}.menu button{width:100%;border:0;background:#fff;text-align:left;padding:11px 16px;color:#3b4a54}.menu button:hover{background:#f2f4f5}
+.net{font-size:11px;color:#667781;display:flex;align-items:center;gap:6px}.net i{width:8px;height:8px;border-radius:50%;background:#e67e22}.net.ok i{background:#25d366}.net.bad i{background:#e74c3c}
+@media(max-width:760px){
+  #app,.shell{height:var(--vvh,100dvh)}
+  .shell{grid-template-columns:1fr}.chat{position:fixed;inset:0;transform:translateX(100%);transition:.22s;z-index:10}.chat.open{transform:none}.back{display:grid;place-items:center}.sidebar{border:0}.messages{padding:16px 10px}.msg{max-width:86%}.topbar,.chat-head{padding-left:10px;padding-right:10px}
+}
+.boot-note{position:fixed;inset:0;z-index:100;background:#f0f2f5;display:grid;place-items:center;padding:24px;text-align:center;color:#3b4a54}.boot-note .card{max-width:460px;background:#fff;border-radius:18px;padding:26px;box-shadow:0 16px 50px rgba(0,0,0,.2)}.boot-note h2{margin:0 0 10px}.boot-note p{line-height:1.5;color:#667781}.boot-note small{display:block;margin-top:14px;color:#8696a0}.boot-note.ok{display:none}
+@supports (-webkit-touch-callout:none){html{height:-webkit-fill-available}body{min-height:-webkit-fill-available}.chat,.sidebar{min-height:0}.messages{-webkit-overflow-scrolling:touch}.composer textarea{font-size:16px}.search input,.field input{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="boot-note" id="bootNote"><div class="card"><h2>Abriendo Dupi Chat…</h2><p id="bootText">Cargando el motor de mensajería.</p><small>Esta versión está preparada para abrirse como página web en Safari, Chrome o cualquier navegador moderno.</small></div></div>
+<noscript><div class="boot-note"><div class="card"><h2>JavaScript está bloqueado</h2><p>Dupi Chat necesita JavaScript para enviar mensajes. Actívalo en tu navegador y vuelve a cargar la página.</p></div></div></noscript>
+<div id="app">
+  <main class="shell">
+    <aside class="sidebar">
+      <header class="topbar">
+        <div class="avatar" id="meAvatar">?</div>
+        <div class="me-info"><b id="meName">Dupi Chat</b><div class="net" id="netState"><i></i><span>Conectando…</span></div></div>
+        <button class="icon" id="refreshBtn" title="Actualizar usuarios">↻</button>
+        <button class="icon" id="menuBtn" title="Menú">⋮</button>
+        <div class="menu" id="menu" hidden>
+          <button id="shareBtn">Compartir Dupi Chat</button>
+          <button id="copyIdBtn">Copiar mi ID</button>
+          <button id="renameBtn">Cambiar nombre</button>
+          <button id="logoutBtn">Cerrar sesión local</button>
+        </div>
+      </header>
+      <div class="search-wrap"><div class="search"><span>⌕</span><input id="search" placeholder="Buscar usuario" autocomplete="off"></div></div>
+      <div class="tabs"><button class="chip active" data-filter="all">Todos</button><button class="chip" data-filter="online">En línea</button></div>
+      <section class="list" id="contactList"></section>
+    </aside>
+    <section class="chat" id="chat">
+      <header class="chat-head">
+        <button class="icon back" id="backBtn" title="Volver">←</button>
+        <div class="avatar" id="chatAvatar">?</div>
+        <div class="chat-title"><b id="chatName">Selecciona un chat</b><div class="status" id="chatStatus"></div></div>
+      </header>
+      <div class="messages" id="messages"></div>
+      <footer class="composer">
+        <button class="icon" id="emojiBtn" title="Emoji">☺</button>
+        <textarea id="messageInput" rows="1" placeholder="Escribe un mensaje" disabled></textarea>
+        <button class="send" id="sendBtn" title="Enviar" disabled>➤</button>
+      </footer>
+      <div class="welcome" id="welcome">
+        <div class="inner"><div class="phone">💬</div><h1>Dupi Chat</h1><p>Comparte el enlace de Dupi Chat con otra persona. Cada quien crea su usuario y podrán verse y chatear cuando estén conectados a Internet.</p><div class="lockline">🔒 Mensajes privados cifrados de extremo a extremo mediante Nostr NIP‑17/NIP‑44.</div></div>
+      </div>
+    </section>
+  </main>
+</div>
+<div class="modal-bg" id="registerModal" hidden>
+  <div class="modal">
+    <h2>Crea tu usuario</h2>
+    <p>No necesitas correo ni contraseña. Este navegador generará una identidad privada y la guardará solo en este dispositivo.</p>
+    <div class="field"><label>Nombre de usuario</label><input id="usernameInput" maxlength="24" placeholder="Ej. Carlos" autocomplete="nickname"></div>
+    <div class="err" id="registerErr"></div>
+    <button class="primary" id="registerBtn">ENTRAR A DUPI CHAT</button>
+    <p class="tiny">Necesitas Internet. Si borras los datos del navegador, perderás esta identidad local. No uses esta demo para información extremadamente sensible.</p>
+  </div>
+</div>
+<div class="toastbox" id="toasts"></div>
+<script>
+(function(){
+  const hosted = location.protocol === 'https:' || location.protocol === 'http:';
+  if (!hosted) {
+    const el=document.getElementById('bootText');
+    if(el) el.textContent='Abre Dupi Chat desde su enlace web para máxima compatibilidad.';
+  }
+  const urls=[
+    'https://unpkg.com/nostr-tools@2.23.5/lib/nostr.bundle.js',
+    'https://cdn.jsdelivr.net/npm/nostr-tools@2.23.5/lib/nostr.bundle.js'
+  ];
+  let i=0;
+  function show(msg){ const el=document.getElementById('bootText'); if(el) el.textContent=msg; }
+  function next(){
+    if(i>=urls.length){ show('No pude cargar la red de mensajería. Revisa que tengas Internet y vuelve a abrir la app.'); return; }
+    const s=document.createElement('script');
+    const src=urls[i++];
+    let done=false;
+    const timer=setTimeout(()=>{ if(done)return; done=true; try{s.remove()}catch{}; next(); },7000);
+    s.src=src; s.async=true; s.crossOrigin='anonymous';
+    s.onload=()=>{ if(done)return; done=true; clearTimeout(timer); if(window.NostrTools){ window.__dupiNostrReady=true; if(window.__dupiStart) window.__dupiStart(); } else next(); };
+    s.onerror=()=>{ if(done)return; done=true; clearTimeout(timer); next(); };
+    document.head.appendChild(s);
+  }
+  next();
+})();
+</script>
+<script>
+window.__dupiStart = function(){
+  if(window.__dupiStarted) return;
+  if(!window.NostrTools) return;
+  window.__dupiStarted=true;
+  const { SimplePool, generateSecretKey, getPublicKey, finalizeEvent, nip17 } = window.NostrTools;
+  if(!SimplePool || !generateSecretKey || !getPublicKey || !finalizeEvent || !nip17){
+    const el=document.getElementById('bootText'); if(el) el.textContent='El motor cargó incompleto. Vuelve a abrir la app con Internet.';
+    return;
+  }
+  if(!Promise.any){
+    Promise.any=function(promises){return new Promise((resolve,reject)=>{let errors=[],pending=0,resolved=false;for(const p of promises){pending++;Promise.resolve(p).then(v=>{if(!resolved){resolved=true;resolve(v)}},e=>{errors.push(e);pending--;if(!pending&&!resolved)reject(errors)});}if(!pending)reject([]);});};
+  }
+const APP_TAG = 'dupi-chat-html-v1';
+const PROFILE_KIND = 30078;
+const GIFT_WRAP_KIND = 1059;
+const RELAYS = [
+  'wss://relay.damus.io',
+  'wss://nos.lol',
+  'wss://relay.snort.social',
+  'wss://relay.primal.net'
+];
+const $ = id => document.getElementById(id);
+const pool = new SimplePool();
+if(window.visualViewport){
+  const fitViewport=()=>{ document.documentElement.style.setProperty('--vvh', window.visualViewport.height+'px'); };
+  visualViewport.addEventListener('resize',fitViewport); visualViewport.addEventListener('scroll',fitViewport); fitViewport();
+}
+const memStore={};
+function storeGet(k){ try{return localStorage.getItem(k)}catch(e){return memStore[k]||null} }
+function storeSet(k,v){ try{localStorage.setItem(k,v)}catch(e){memStore[k]=v} }
+function storeRemove(k){ try{localStorage.removeItem(k)}catch(e){delete memStore[k]} }
+let sk = null, pk = null, username = '';
+let currentPeer = null;
+let contacts = new Map();
+let messages = new Map();
+let seenWraps = new Set();
+let presenceTimer = null;
+let profileSub = null, dmSub = null;
+let filterMode = 'all';
+let relayOK = false;
+function hex(bytes){ return Array.from(bytes, b => b.toString(16).padStart(2,'0')).join(''); }
+function fromHex(s){ if(!/^[0-9a-f]{64}$/i.test(s)) throw new Error('Clave local inválida'); return new Uint8Array(s.match(/.{2}/g).map(x=>parseInt(x,16))); }
+function initials(name){ return (name||'?').trim().split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase(); }
+function shortId(key){ return key ? key.slice(0,6) : '------'; }
+function now(){ return Math.floor(Date.now()/1000); }
+function fmtTime(ts){ return new Date(ts*1000).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); }
+function fmtDay(ts){ const d=new Date(ts*1000), t=new Date(); if(d.toDateString()===t.toDateString()) return 'HOY'; const y=new Date(); y.setDate(y.getDate()-1); if(d.toDateString()===y.toDateString()) return 'AYER'; return d.toLocaleDateString(); }
+function safeJson(s){ try{return JSON.parse(s)}catch{return null} }
+function toast(text,bad=false){ const d=document.createElement('div'); d.className='toast'+(bad?' bad':''); d.textContent=text; $('toasts').appendChild(d); setTimeout(()=>d.remove(),3300); }
+function setNet(state,text){ relayOK=state==='ok'; $('netState').className='net '+state; $('netState').querySelector('span').textContent=text; }
+function contactOnline(c){ return !!c.lastSeen && (now()-c.lastSeen)<130; }
+function chatKey(peer){ return peer; }
+function peerFromRumor(r){ if(r.pubkey===pk){ const p=r.tags.find(t=>t[0]==='p' && t[1]!==pk); return p?.[1]||null; } return r.pubkey; }
+function saveLocal(){ storeSet('dupi_chat_identity', JSON.stringify({sk:hex(sk), username})); }
+function loadLocal(){
+  const x=safeJson(storeGet('dupi_chat_identity')||'');
+  if(!x?.sk || !x?.username) return false;
+  try{ sk=fromHex(x.sk); pk=getPublicKey(sk); username=x.username; return true; }catch{return false;}
+}
+async function publish(event){
+  const attempts = pool.publish(RELAYS,event);
+  try{ await Promise.any(attempts); setNet('ok','Conectado'); return true; }
+  catch(e){ setNet('bad','Sin conexión a la red'); return false; }
+}
+async function publishProfile(){
+  if(!sk) return;
+  const event=finalizeEvent({
+    kind:PROFILE_KIND, created_at:now(),
+    tags:[['d','profile'],['t',APP_TAG]],
+    content:JSON.stringify({username, lastSeen:now(), app:APP_TAG})
+  },sk);
+  await publish(event);
+  ingestProfile(event);
+}
+function ingestProfile(ev){
+  if(ev.kind!==PROFILE_KIND || !ev.tags.some(t=>t[0]==='t'&&t[1]===APP_TAG)) return;
+  const data=safeJson(ev.content); if(!data?.username) return;
+  const old=contacts.get(ev.pubkey);
+  if(old && old.eventTime>ev.created_at) return;
+  contacts.set(ev.pubkey,{pubkey:ev.pubkey,username:String(data.username).slice(0,24),lastSeen:Number(data.lastSeen||ev.created_at),eventTime:ev.created_at});
+  renderContacts();
+  if(currentPeer===ev.pubkey) renderChatHeader();
+}
+async function refreshProfiles(){
+  if(!sk) return;
+  $('refreshBtn').disabled=true;
+  try{
+    const evs=await pool.querySync(RELAYS,{kinds:[PROFILE_KIND],'#t':[APP_TAG],limit:500});
+    evs.forEach(ingestProfile);
+    setNet('ok','Conectado');
+  }catch(e){ setNet('bad','No pude actualizar'); }
+  $('refreshBtn').disabled=false;
+}
+function subscribeProfiles(){
+  try{profileSub?.close?.()}catch{}
+  profileSub=pool.subscribe(RELAYS,{kinds:[PROFILE_KIND],'#t':[APP_TAG],since:now()-86400*30},{onevent:ingestProfile});
+}
+async function ingestWrap(ev){
+  if(seenWraps.has(ev.id)) return; seenWraps.add(ev.id);
+  try{
+    const rumor=nip17.unwrapEvent(ev,sk);
+    if(rumor.kind!==14) return;
+    const peer=peerFromRumor(rumor); if(!peer || peer===pk) return;
+    const arr=messages.get(chatKey(peer))||[];
+    if(arr.some(m=>m.id===rumor.id)) return;
+    arr.push({id:rumor.id,sender:rumor.pubkey,text:rumor.content,created_at:rumor.created_at});
+    arr.sort((a,b)=>a.created_at-b.created_at);
+    messages.set(chatKey(peer),arr);
+    if(!contacts.has(peer)) contacts.set(peer,{pubkey:peer,username:'Usuario '+shortId(peer),lastSeen:0,eventTime:0});
+    renderContacts();
+    if(currentPeer===peer) renderMessages();
+  }catch(e){}
+}
+function subscribeDMs(){
+  try{dmSub?.close?.()}catch{}
+  dmSub=pool.subscribe(RELAYS,{kinds:[GIFT_WRAP_KIND],'#p':[pk],since:now()-86400*30},{onevent:ingestWrap});
+}
+async function loadHistory(){
+  try{
+    const evs=await pool.querySync(RELAYS,{kinds:[GIFT_WRAP_KIND],'#p':[pk],limit:1000});
+    evs.sort((a,b)=>a.created_at-b.created_at);
+    for(const ev of evs) await ingestWrap(ev);
+  }catch(e){ console.warn(e); }
+}
+async function sendMessage(){
+  const text=$('messageInput').value.trim();
+  if(!text || !currentPeer || !sk) return;
+  if(text.length>4000){toast('El mensaje es demasiado largo',true);return;}
+  $('sendBtn').disabled=true;
+  const peer=currentPeer;
+  try{
+    const wraps=nip17.wrapManyEvents(sk,[{publicKey:peer}],text);
+    const localRumor=nip17.unwrapEvent(wraps[0],sk);
+    const results=[];
+    for(const wrap of wraps) results.push(await publish(wrap));
+    if(!results[1]) throw new Error('Recipient relay failed');
+    const arr=messages.get(chatKey(peer))||[];
+    if(!arr.some(m=>m.id===localRumor.id)) arr.push({id:localRumor.id,sender:pk,text,created_at:localRumor.created_at});
+    messages.set(chatKey(peer),arr);
+    $('messageInput').value=''; resizeComposer(); renderMessages(); renderContacts();
+  }catch(e){ toast('No pude enviar el mensaje. Revisa tu Internet.',true); }
+  $('sendBtn').disabled=false;
+}
+function latestFor(peer){ const arr=messages.get(chatKey(peer))||[]; return arr[arr.length-1]||null; }
+function renderContacts(){
+  const q=$('search').value.trim().toLowerCase();
+  let list=[...contacts.values()].filter(c=>c.pubkey!==pk);
+  if(filterMode==='online') list=list.filter(contactOnline);
+  if(q) list=list.filter(c=>c.username.toLowerCase().includes(q)||c.pubkey.includes(q));
+  list.sort((a,b)=>{ const ma=latestFor(a.pubkey)?.created_at||0, mb=latestFor(b.pubkey)?.created_at||0; if(mb!==ma)return mb-ma; return (b.lastSeen||0)-(a.lastSeen||0); });
+  $('contactList').innerHTML='';
+  if(!list.length){ $('contactList').innerHTML='<div class="empty-list"><strong>No hay usuarios todavía</strong>Comparte el enlace con otra persona, que cree su usuario y luego toca ↻.</div>'; return; }
+  for(const c of list){
+    const m=latestFor(c.pubkey), el=document.createElement('div'); el.className='contact'+(currentPeer===c.pubkey?' active':'');
+    const av=document.createElement('div'); av.className='avatar'; av.textContent=initials(c.username);
+    const main=document.createElement('div'); main.className='contact-main';
+    const r1=document.createElement('div'); r1.className='row1';
+    const b=document.createElement('b'); b.textContent=c.username; const time=document.createElement('time'); time.textContent=m?fmtTime(m.created_at):''; r1.append(b,time);
+    const r2=document.createElement('div'); r2.className='row2';
+    const prev=document.createElement('span'); prev.className='preview'; prev.textContent=m?((m.sender===pk?'Tú: ':'')+m.text):('@'+shortId(c.pubkey));
+    const online=document.createElement('span'); online.innerHTML='<i class="online-dot '+(contactOnline(c)?'on':'')+'"></i>'+(contactOnline(c)?'online':''); r2.append(prev,online);
+    main.append(r1,r2); el.append(av,main); el.onclick=()=>openChat(c.pubkey); $('contactList').appendChild(el);
+  }
+}
+function openChat(peer){ currentPeer=peer; $('welcome').hidden=true; $('chat').classList.add('open'); $('messageInput').disabled=false; $('sendBtn').disabled=false; renderContacts(); renderChatHeader(); renderMessages(); setTimeout(()=>$('messageInput').focus(),80); }
+function renderChatHeader(){ const c=contacts.get(currentPeer); if(!c)return; $('chatAvatar').textContent=initials(c.username); $('chatName').textContent=c.username; $('chatStatus').textContent=contactOnline(c)?'en línea':'@'+shortId(c.pubkey); }
+function renderMessages(){
+  const box=$('messages'); box.innerHTML=''; const arr=messages.get(chatKey(currentPeer))||[]; let day='';
+  for(const m of arr){ const d=fmtDay(m.created_at); if(d!==day){day=d; const sep=document.createElement('div');sep.className='date-pill';sep.textContent=d;box.appendChild(sep);} const el=document.createElement('div'); el.className='msg '+(m.sender===pk?'mine':'theirs'); const tx=document.createElement('span');tx.textContent=m.text; const meta=document.createElement('span');meta.className='meta';meta.innerHTML=fmtTime(m.created_at)+(m.sender===pk?' <span class="ticks">✓✓</span>':''); el.append(tx,meta);box.appendChild(el); }
+  if(!arr.length){ const sep=document.createElement('div');sep.className='date-pill';sep.textContent='Inicio del chat';box.appendChild(sep); }
+  requestAnimationFrame(()=>box.scrollTop=box.scrollHeight);
+}
+function resizeComposer(){ const t=$('messageInput'); t.style.height='42px'; t.style.height=Math.min(t.scrollHeight,120)+'px'; }
+async function register(){
+  const name=$('usernameInput').value.trim().replace(/\s+/g,' ');
+  $('registerErr').textContent='';
+  if(name.length<2){$('registerErr').textContent='Pon un nombre de al menos 2 letras.';return;}
+  if(name.length>24){$('registerErr').textContent='Máximo 24 caracteres.';return;}
+  $('registerBtn').disabled=true; $('registerBtn').textContent='CREANDO…';
+  sk=generateSecretKey(); pk=getPublicKey(sk); username=name; saveLocal();
+  $('registerModal').hidden=true; await startApp();
+  $('registerBtn').disabled=false; $('registerBtn').textContent='ENTRAR A DUPI CHAT';
+}
+async function startApp(){
+  $('meName').textContent=username; $('meAvatar').textContent=initials(username); setNet('','Conectando…');
+  contacts.set(pk,{pubkey:pk,username,lastSeen:now(),eventTime:now()});
+  subscribeProfiles(); subscribeDMs();
+  await Promise.allSettled([publishProfile(),refreshProfiles(),loadHistory()]);
+  clearInterval(presenceTimer); presenceTimer=setInterval(publishProfile,60000);
+  renderContacts();
+}
+$('registerBtn').onclick=register;
+$('usernameInput').addEventListener('keydown',e=>{if(e.key==='Enter')register()});
+$('refreshBtn').onclick=async()=>{await publishProfile();await refreshProfiles();toast('Usuarios actualizados');};
+$('search').oninput=renderContacts;
+document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));b.classList.add('active');filterMode=b.dataset.filter;renderContacts();});
+$('sendBtn').onclick=sendMessage;
+$('messageInput').addEventListener('input',resizeComposer);
+$('messageInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
+$('backBtn').onclick=()=>{$('chat').classList.remove('open')};
+$('emojiBtn').onclick=()=>{if(!$('messageInput').disabled){$('messageInput').value+=' 😊';resizeComposer();$('messageInput').focus();}};
+$('menuBtn').onclick=e=>{e.stopPropagation();$('menu').hidden=!$('menu').hidden};
+document.addEventListener('click',()=>{$('menu').hidden=true});
+$('shareBtn').onclick=async()=>{
+  const data={title:'Dupi Chat',text:'Únete a Dupi Chat',url:location.href};
+  try{
+    if(navigator.share) await navigator.share(data);
+    else { await navigator.clipboard.writeText(location.href); toast('Enlace copiado'); }
+  }catch(e){ if(e && e.name!=='AbortError') toast('No pude compartir el enlace',true); }
+};
+$('copyIdBtn').onclick=async()=>{try{await navigator.clipboard.writeText(pk);toast('Tu ID fue copiado');}catch{toast('ID: '+pk)}};
+$('renameBtn').onclick=()=>{const n=prompt('Nuevo nombre de usuario:',username);if(!n)return;const v=n.trim().slice(0,24);if(v.length<2)return;username=v;saveLocal();$('meName').textContent=username;$('meAvatar').textContent=initials(username);publishProfile();renderContacts();};
+$('logoutBtn').onclick=()=>{if(confirm('Esto borra la identidad de este navegador. ¿Continuar?')){storeRemove('dupi_chat_identity');location.reload();}};
+window.addEventListener('online',()=>{setNet('','Reconectando…');publishProfile();refreshProfiles()});
+window.addEventListener('offline',()=>setNet('bad','Sin Internet'));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&sk){setNet('','Reconectando…');publishProfile();refreshProfiles();}});
+if(loadLocal()) startApp(); else $('registerModal').hidden=false;
+  const bn=document.getElementById('bootNote'); if(bn) bn.classList.add('ok');
+};
+if(window.__dupiNostrReady) window.__dupiStart();
+setTimeout(()=>{
+  if(!window.__dupiStarted){
+    const el=document.getElementById('bootText');
+    if(el) el.textContent='La app no pudo arrancar. Comprueba tu conexión a Internet y recarga la página. Si el problema sigue, prueba Safari o Chrome.';
+  }
+},8000);
+</script>
+</body>
+</html>
